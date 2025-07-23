@@ -7,13 +7,21 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain.agents import create_tool_calling_agent, AgentExecutor
 from tools import  save_tool
 
+from typing import Union
+
+from fastapi import FastAPI
+
+app = FastAPI()
+
 load_dotenv()
 
 class ResearchResponse(BaseModel):
     topic: str
     summary: str
+    bulleted_list: list[str]
+    additional_info: str
     #sources: list[str]
-    tools_used: list[str]
+    #tools_used: list[str]
     
 
 llm = ChatAnthropic(model="claude-3-5-sonnet-20241022")
@@ -25,8 +33,7 @@ prompt = ChatPromptTemplate.from_messages(
             "system",
             """
             You are an ex software engineer, focused on documentation
-            Make documentation of the given code.
-            Always use the tools provided to you.
+            Make documentation of the given code 
             Wrap the output in this format and provide no other text\n{format_instructions}
             """,
         ),
@@ -36,7 +43,7 @@ prompt = ChatPromptTemplate.from_messages(
     ]
 ).partial(format_instructions=parser.get_format_instructions())
 
-tools = [ save_tool]
+tools = [ ]
 agent = create_tool_calling_agent(
     llm=llm,
     prompt=prompt,
@@ -44,11 +51,12 @@ agent = create_tool_calling_agent(
 )
 
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
-query = input("Enter the code: \n ")
-raw_response = agent_executor.invoke({"query": query})
 
-try:
+@app.post("/documentation")
+def create_documentation(query: str):
+    raw_response = agent_executor.invoke({"query": query})
+
+
     structured_response = parser.parse(raw_response.get("output")[0]["text"])
-    print(structured_response)
-except Exception as e:
-    print("Error parsing response", e, "Raw Response - ", raw_response)
+    return structured_response
+
