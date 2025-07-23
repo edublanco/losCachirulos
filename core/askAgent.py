@@ -31,7 +31,7 @@ class ChromaQueryResponse(BaseModel):
     documents: list[str]
 
 
-def query_chroma(query: str, n_results: int = 3) -> str:
+def query_chroma(query: str, n_results: int = 1) -> str:
     """
     Retrieve top-n related documents from the Chroma collection for the given query.
     Returns a plain-text concatenation of the documents.
@@ -40,8 +40,12 @@ def query_chroma(query: str, n_results: int = 3) -> str:
         query_embeddings=default_ef(query),
         n_results=n_results
     )
-    docs = results.get("documents", [])
-    return "\n\n".join(docs)
+
+    print("////////////////////////////////////////////////////////////")
+    print(f"Query: {query}, Results: {results}")
+    print("////////////////////////////////////////////////////////////")
+
+    return results if results else "No relevant documents found."
 
 # Wrap as a LangChain Tool
 tool_query = Tool(
@@ -60,13 +64,19 @@ class ChromResponse(BaseModel):
     used_documents: list[str]
 
 # Instantiate the LLM and output parser
-llm = ChatAnthropic(model="claude-3-5-sonnet-20241022")
+#llm = ChatAnthropic(model="claude-3-5-sonnet-20241022", max_tokens=1024 , temperature=0.3)
+# open AI model
+llm = ChatOpenAI(model="gpt-4o", max_tokens=1024, temperature=0.3)
 parser = PydanticOutputParser(pydantic_object=ChromResponse)
+
+
+
 
 # Build the chat prompt template
 template = ChatPromptTemplate.from_messages([
     ("system", "You are an intelligent assistant that answers questions using retrieved context."
                 " Use the `chroma_query` tool to fetch relevant docs when needed and cite them."
+                "The response should be nom more than 100 words."
                 " Wrap your response following the structured format instructions: {format_instructions}"),
     ("human", "Query: {query}"),
     ("placeholder", "{agent_scratchpad}")
