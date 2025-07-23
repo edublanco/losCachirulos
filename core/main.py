@@ -6,6 +6,9 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain.agents import create_tool_calling_agent, AgentExecutor
 from tools import  save_tool
+import chromadb
+
+client = chromadb.HttpClient(host="localhost", port=8000, ssl=False)
 
 from typing import Union
 
