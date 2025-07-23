@@ -2,40 +2,22 @@
 import axios from 'axios';
 
 const createCompletion = async (conversationId, prevMessages, newMessages, temperature) => {
-  /*
+  console.log(newMessages);
   try {
-    const response = await axios.post(`${URL}/completions`, {
-      conversationId,
-      prevMessages,
-      newMessages,
-      temperature,
+    const response = await axios.post(`http://localhost:8000/send_message`, {
+      chatId: "112233",
+      message: newMessages[0].content
     }, {
       headers: {
-        'x-api-key': KEY,
+        'x-api-key': '',
       },
     });
-    return response.data.data;
+    
+    return response.data;
   } catch (err) {
+    console.error('Error creating completion:', err);
     throw new Error(err?.response?.data?.error || err.message);
   }
-  */
-  const getRandomString = (min, max) => {
-    const length = Math.floor(Math.random() * (max - min + 1)) + min;
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-  };
-  
-  const response = {
-    conversation: "12345",
-    result: {
-      content: getRandomString(200,600)
-    }
-  };
-  return response;
 }
 
 export default createCompletion;

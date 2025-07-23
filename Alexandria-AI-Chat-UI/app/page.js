@@ -199,13 +199,14 @@ const Playground = () => {
       }
 
       const response = await createCompletion(conversationId, prevMessages, newMessages, temperature);
-      const newConvId = response.conversation;
-      const reply = response.result.content;
+      const newConvId = response.responseChatId;
+      const reply = response.responseMessage;
 
       newMessages.push({ role: 'assistant', content: reply });
       setMessages([...prevMessages, ...newMessages]);
       setConversationId(newConvId);
     } catch (err) {
+      console.error('Error creating completion1:', err);
       enqueueSnackbar(err.message, { variant: 'error' });
     } finally {
       setCompletionLoading(false);
