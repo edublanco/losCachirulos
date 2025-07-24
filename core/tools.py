@@ -60,3 +60,50 @@ def get_repo_files(repo_url: str, clone_dir: str = "repo"):
     # print(files_list)
     return files_list
 
+
+
+
+# ++++++++++++++++++++++++++++++++++++++++ Mi ++++++++++++++++++++++++++++++++++++++++
+
+import secrets
+import string
+
+def generate_random_string(length=12):
+    characters = string.ascii_letters + string.digits  # A-Z, a-z, 0-9
+    return ''.join(secrets.choice(characters) for _ in range(length))
+
+# # Example usage
+# random_str = generate_random_string()
+# print(random_str)
+
+
+
+
+# ++++++++++++++++++++++++++++++++++++++++ Repo Files Processing ++++++++++++++++++++++++++++++++++++++++
+
+import chromadb
+from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
+
+chroma_client = chromadb.HttpClient(host='10.112.154.220', port=8001)
+default_ef = DefaultEmbeddingFunction()
+collection = chroma_client.get_or_create_collection(name="my_collection", embedding_function =default_ef)
+
+# switch add to upsert to avoid adding the same documents every time 
+
+# Saves info into db:
+def save_docs_in_db(docs: list = [], unique_id: str = ""):
+    print("save_docs_in_db -> saving docs in db:")
+    print(len(docs))
+
+    unique_id = generate_random_string()
+    print("unique_id:")
+    print(unique_id)
+
+    collection.upsert(
+        documents=docs,
+        ids=[unique_id]
+    )
+
+
+
+

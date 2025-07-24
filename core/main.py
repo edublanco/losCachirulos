@@ -8,11 +8,13 @@ from langchain.agents import create_tool_calling_agent, AgentExecutor
 from tools import save_tool
 import chromadb
 
-client = chromadb.HttpClient(host="localhost", port=8000, ssl=False)
+# client = chromadb.HttpClient(host="localhost", port=8000, ssl=False)
 from tools import get_repo_files
+from tools import save_docs_in_db
 from typing import Union
 from fastapi import FastAPI
 import os
+import json
 
 app = FastAPI()
 load_dotenv()
@@ -49,7 +51,7 @@ prompt = ChatPromptTemplate.from_messages(
     ]
 ).partial(format_instructions=parser.get_format_instructions())
 
-tools = [save_tool]
+tools = []
 agent = create_tool_calling_agent(
     llm=llm,
     prompt=prompt,
@@ -76,6 +78,7 @@ def get_files_list(repo_url: str):
     files = get_repo_files(repo_url)
     print(files)
     # Loops files, reads them and sends to agents:
+    # docs = []
     for file in files:
         try:
             # file_path = os.path.join(root, file)
@@ -86,11 +89,49 @@ def get_files_list(repo_url: str):
                 # print(file_content)
                 raw_response = agent_executor.invoke({"query": file_content})
                 structured_response = parser.parse(raw_response.get("output")[0]["text"])
-                print(structured_response)
+
+                print(" ++++++++++++++++++++++++++++++++++++++++ structured_response ++++++++++++++++++++++++++++++++++++++++ ")
+                # print(type(structured_response))
+                # print(structured_response)
+
+                response_json = json.dumps(structured_response.__dict__, indent=2)
+
+                save_docs_in_db(docs=[response_json])
+
+                # docs.append(response_json)
+
+                # print("response_json:")
+                # print(type(response_json))
+                # print(response_json)
+
+                # print("response_json['summary']:")
+                # print(response_json[1])
+
+                # bulletpoints = " ".join(response_json[2])
+                # print("bulletpoints:")
+                # print(bulletpoints)
+
+                # result = f"{response_json['summary']}, {bulletpoints}"
+                # print(result)
+
+                # print("result:")
+                # print(result)
+               
+                print(" ---------------------------------------- structured_response ---------------------------------------- ")
+                
+                #docs.append(raw_response)
+                # print(structured_response)
                 # print(f"\n--- {file_path} ---\n")
                 # print(f.read())
         except Exception as e:
             print(f"\n--- Skipped {file_path} (error: {e}) ---\n")
+
+    # print(" ++++++++++++++++++++++++++++++++++++++++ docs ++++++++++++++++++++++++++++++++++++++++ ")
+    # print(docs)
+    # print(" ---------------------------------------- docs ---------------------------------------- ")
+
+    # Saves all docs in db at once:
+    # save_docs_in_db(docs=docs)
 
     return {"files": files}
 
