@@ -16,8 +16,11 @@ async def handle_webhook(request: Request):
     #print("Received webhook:", json.dumps(payload, indent=4))
     #print(payload["pull_request"])
     #Build URL for cloning repo
+    if payload['action'] != 'closed' and not payload['pull_request']['merged']:
+        print("Not merged yet")
+        return None
     repo_full_name=payload["repository"]["full_name"]
     commit_sha = payload["pull_request"]["head"]["sha"]
-    github_url=f"https://api.github.com/repos/{repo_full_name}/git/trees/{commit_sha}?recursive=1"
+    github_url=f"https://github.com/{repo_full_name}.git"
     cloude_model_client.get_doc_from_cloude(github_url)
     return JSONResponse(content={"status": "ok"})
