@@ -199,8 +199,8 @@ const Playground = () => {
       }
 
       const response = await createCompletion(conversationId, prevMessages, newMessages, temperature);
-      const newConvId = response.responseChatId;
-      const reply = response.responseMessage;
+      const newConvId = "123";
+      const reply = response;
 
       newMessages.push({ role: 'assistant', content: reply });
       setMessages([...prevMessages, ...newMessages]);
