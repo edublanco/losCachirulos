@@ -2,40 +2,28 @@
 import axios from 'axios';
 
 const createCompletion = async (conversationId, prevMessages, newMessages, temperature) => {
-  /*
+
   try {
-    const response = await axios.post(`${URL}/completions`, {
-      conversationId,
-      prevMessages,
-      newMessages,
-      temperature,
+    const response = await axios.post(`http://localhost:8000/chroma-query`, null,{
+      params:{
+        query: newMessages[0].content
+      }
     }, {
       headers: {
-        'x-api-key': KEY,
+        'x-api-key': '',
       },
     });
-    return response.data.data;
+    console.log(response);
+
+    let resultString = response.data.answer;
+    resultString += "\n\n";
+    resultString += "INTERNAL DOCUMENTATION USED: " + response.data.used_documents[0];
+
+    return resultString;
   } catch (err) {
+    console.error('Error creating completion:', err);
     throw new Error(err?.response?.data?.error || err.message);
   }
-  */
-  const getRandomString = (min, max) => {
-    const length = Math.floor(Math.random() * (max - min + 1)) + min;
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-  };
-  
-  const response = {
-    conversation: "12345",
-    result: {
-      content: getRandomString(200,600)
-    }
-  };
-  return response;
 }
 
 export default createCompletion;
